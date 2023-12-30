@@ -15,7 +15,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    getLocation();
     getWeatherData();
   }
 
@@ -30,29 +29,28 @@ class _LoadingScreenState extends State<LoadingScreen> {
     );
   }
 
-  void getLocation() async {
+  void getWeatherData() async {
+    String appID = "9a170e1ad57ee4299a181aeeeee22e7f";
+    String data, city;
+    double temp, lat = 0, lon = 0;
     try {
       LocationPermission permission = await Geolocator.requestPermission();
       Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.low);
-      print(position);
+      lon = position.longitude;
+      lat = position.latitude;
     } catch (e) {
       print(e);
     }
-  }
-
-  void getWeatherData() async {
-    double lon;
-    String data, city;
     Uri url = Uri.parse(
-        "https://api.openweathermap.org/data/2.5/weather?q=Tagaytay&appid=9a170e1ad57ee4299a181aeeeee22e7f");
+        "https://api.openweathermap.org/data/2.5/weather?lat=$lat&lon=$lon&appid=$appID");
     Response response = await get(url);
     data = response.body;
+
     if (response.statusCode == 200) {
-      lon = jsonDecode(data)['coord']['lon'];
       city = jsonDecode(data)['name'];
-      print(lon);
-      print(city);
+      temp = jsonDecode(data)['main']['temp'];
+      print("City: $city\nTemp: $temp");
     }
   }
 }
