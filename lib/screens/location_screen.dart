@@ -1,14 +1,43 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:weather_app/screens/city_screen.dart';
 import 'package:weather_app/utilities/constants.dart';
+import 'package:weather_app/services/weather.dart';
+import 'package:weather_app/screens/city_screen.dart';
 
 class LocationScreen extends StatefulWidget {
-  const LocationScreen({super.key});
+  LocationScreen(this.data, {super.key});
+  String data;
 
   @override
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
+  String city = '', data = '', icon = '', message = '';
+  double temp = 0;
+  int id = 0;
+  @override
+  void initState() {
+    super.initState();
+    data = widget.data;
+    updateUI();
+    getCondition();
+  }
+
+  void updateUI() {
+    city = jsonDecode(data)['name'];
+    temp = jsonDecode(data)['main']['temp'];
+    id = jsonDecode(data)['weather'][0]['id'];
+    print("City: $city\nTemp: $temp\nID: $id");
+  }
+
+  void getCondition() {
+    WeatherModel weatherModel = new WeatherModel();
+    icon = weatherModel.getWeatherIcon(id);
+    message = weatherModel.getMessage(temp.toInt());
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -38,7 +67,12 @@ class _LocationScreenState extends State<LocationScreen> {
                     ),
                   ),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (context) {
+                        return CityScreen();
+                      }));
+                    },
                     child: const Icon(
                       Icons.location_city,
                       size: 50.0,
@@ -46,25 +80,25 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                 ],
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(left: 15.0),
                 child: Row(
                   children: <Widget>[
                     Text(
-                      '32°',
+                      temp.toStringAsFixed(0) + '°',
                       style: kTempTextStyle,
                     ),
                     Text(
-                      '☀️',
+                      icon,
                       style: kConditionTextStyle,
                     ),
                   ],
                 ),
               ),
-              const Padding(
+              Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "It's 🍦 time in San Francisco!",
+                  "$message in $city!",
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),
