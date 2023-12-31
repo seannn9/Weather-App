@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:weather_app/screens/city_screen.dart';
@@ -15,7 +16,7 @@ class LocationScreen extends StatefulWidget {
 
 class _LocationScreenState extends State<LocationScreen> {
   String city = '', icon = '', message = '';
-  double temp = 0;
+  int temperature = 0;
   int id = 0;
 
   @override
@@ -30,16 +31,17 @@ class _LocationScreenState extends State<LocationScreen> {
         city = 'city';
         icon = 'Error';
         message = 'Cannot find data';
-        temp = 0;
+        temperature = 0;
         return;
       }
       city = jsonDecode(data)['name'];
-      temp = jsonDecode(data)['main']['temp'];
+      double temp = jsonDecode(data)['main']['temp'];
+      temperature = temp.toInt();
       id = jsonDecode(data)['weather'][0]['id'];
 
       WeatherModel weatherModel = new WeatherModel();
       icon = weatherModel.getWeatherIcon(id);
-      message = weatherModel.getMessage(temp.toInt());
+      message = weatherModel.getMessage(temperature);
       // for debugging
       print("City: $city\nTemp: $temp\nID: $id");
     });
@@ -100,9 +102,9 @@ class _LocationScreenState extends State<LocationScreen> {
                 child: Row(
                   children: <Widget>[
                     Visibility(
-                      visible: temp != 0,
+                      visible: temperature != 0,
                       child: Text(
-                        temp.toStringAsFixed(0) + '°',
+                        temperature.toStringAsFixed(0) + '°',
                         style: kTempTextStyle,
                       ),
                     ),
