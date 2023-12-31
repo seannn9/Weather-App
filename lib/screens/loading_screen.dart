@@ -27,7 +27,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void getWeatherData() async {
     Networking networking = new Networking();
-    String data = await networking.getData();
+    var data = await networking.getLocationData();
 
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return LocationScreen(data);

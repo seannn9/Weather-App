@@ -1,41 +1,48 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:weather_app/screens/city_screen.dart';
+import 'package:weather_app/services/networking.dart';
 import 'package:weather_app/utilities/constants.dart';
 import 'package:weather_app/services/weather.dart';
-import 'package:weather_app/screens/city_screen.dart';
 
 class LocationScreen extends StatefulWidget {
-  LocationScreen(this.data, {super.key});
-  String data;
+  LocationScreen(this.locationData, {super.key});
+  final locationData;
 
   @override
   State<LocationScreen> createState() => _LocationScreenState();
 }
 
 class _LocationScreenState extends State<LocationScreen> {
-  String city = '', data = '', icon = '', message = '';
+  String city = '', icon = '', message = '';
   double temp = 0;
   int id = 0;
+
   @override
   void initState() {
     super.initState();
-    data = widget.data;
-    updateUI();
-    getCondition();
+    updateUI(widget.locationData);
   }
 
-  void updateUI() {
-    city = jsonDecode(data)['name'];
-    temp = jsonDecode(data)['main']['temp'];
-    id = jsonDecode(data)['weather'][0]['id'];
-    print("City: $city\nTemp: $temp\nID: $id");
-  }
+  void updateUI(dynamic data) {
+    setState(() {
+      if (data == null) {
+        city = 'city';
+        icon = 'Error';
+        message = 'Cannot find data';
+        temp = 0;
+        return;
+      }
+      city = jsonDecode(data)['name'];
+      temp = jsonDecode(data)['main']['temp'];
+      id = jsonDecode(data)['weather'][0]['id'];
 
-  void getCondition() {
-    WeatherModel weatherModel = new WeatherModel();
-    icon = weatherModel.getWeatherIcon(id);
-    message = weatherModel.getMessage(temp.toInt());
+      WeatherModel weatherModel = new WeatherModel();
+      icon = weatherModel.getWeatherIcon(id);
+      message = weatherModel.getMessage(temp.toInt());
+
+      print("City: $city\nTemp: $temp\nID: $id");
+    });
   }
 
   @override
@@ -60,18 +67,26 @@ class _LocationScreenState extends State<LocationScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      var data = await Networking().getLocationData();
+                      updateUI(data);
+                    },
                     child: const Icon(
                       Icons.near_me,
                       size: 50.0,
                     ),
                   ),
                   TextButton(
-                    onPressed: () {
-                      Navigator.push(context,
+                    onPressed: () async {
+                      var newCity;
+                      newCity = await Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         return CityScreen();
                       }));
+                      if (newCity != null) {
+                        var weather = await Networking().getCityData(newCity);
+                        updateUI(weather);
+                      }
                     },
                     child: const Icon(
                       Icons.location_city,
@@ -84,9 +99,12 @@ class _LocationScreenState extends State<LocationScreen> {
                 padding: EdgeInsets.only(left: 15.0),
                 child: Row(
                   children: <Widget>[
-                    Text(
-                      temp.toStringAsFixed(0) + '°',
-                      style: kTempTextStyle,
+                    Visibility(
+                      visible: temp != 0,
+                      child: Text(
+                        temp.toStringAsFixed(0) + '°',
+                        style: kTempTextStyle,
+                      ),
                     ),
                     Text(
                       icon,
@@ -98,7 +116,7 @@ class _LocationScreenState extends State<LocationScreen> {
               Padding(
                 padding: EdgeInsets.only(right: 15.0),
                 child: Text(
-                  "$message in $city!",
+                  "$message in $city",
                   textAlign: TextAlign.right,
                   style: kMessageTextStyle,
                 ),
