@@ -7,7 +7,7 @@ import 'package:weather_app/services/weather.dart';
 
 class LocationScreen extends StatefulWidget {
   LocationScreen(this.locationData, {super.key});
-  final locationData;
+  String locationData;
 
   @override
   State<LocationScreen> createState() => _LocationScreenState();
@@ -40,7 +40,7 @@ class _LocationScreenState extends State<LocationScreen> {
       WeatherModel weatherModel = new WeatherModel();
       icon = weatherModel.getWeatherIcon(id);
       message = weatherModel.getMessage(temp.toInt());
-
+      // for debugging
       print("City: $city\nTemp: $temp\nID: $id");
     });
   }
@@ -78,13 +78,13 @@ class _LocationScreenState extends State<LocationScreen> {
                   ),
                   TextButton(
                     onPressed: () async {
-                      var newCity;
-                      newCity = await Navigator.push(context,
+                      dynamic newCity = await Navigator.push(context,
                           MaterialPageRoute(builder: (context) {
                         return CityScreen();
                       }));
                       if (newCity != null) {
-                        var weather = await Networking().getCityData(newCity);
+                        dynamic weather =
+                            await Networking().getCityData(newCity);
                         updateUI(weather);
                       }
                     },

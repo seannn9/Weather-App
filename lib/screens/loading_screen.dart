@@ -18,7 +18,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: Center(
         child: SpinKitWave(size: 70.0, color: Colors.orange),
       ),
@@ -27,7 +27,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   void getWeatherData() async {
     Networking networking = new Networking();
-    var data = await networking.getLocationData();
+    String data = await networking.getLocationData();
 
     Navigator.push(context, MaterialPageRoute(builder: (context) {
       return LocationScreen(data);

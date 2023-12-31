@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:http/http.dart';
 import 'package:weather_app/services/location.dart';
 
@@ -29,7 +27,6 @@ class Networking {
 
   Future getData(url) async {
     Response response = await get(url);
-
     if (response.statusCode == 200) {
       String data = response.body;
       return data;
